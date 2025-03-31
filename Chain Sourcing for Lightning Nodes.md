@@ -46,21 +46,17 @@ A typical use case for such a sourcer is the continuous synchronization of liste
 
 ### Implementation Aside: Block-syncing with LDK
 
-LDK, in its `lightning-block-sync` crate, provides a helpful client to keep listeners in-sync with the blockchain. In-sync here meaning that the listeners all have the same view of the blockchain.
+To manage blockchain synchronization, the Lightning Development Kit (LDK), in its `lightning-block-sync` crate, provides a helpful client to keep listeners in-sync with the blockchain. In-sync here meaning that the listeners all have the same up-to-date view of the blockchain.
 
-Having the same view is important because at any time $$T_1$$, the state of the blockchain will change from when it was last viewed. Blocks are connected and disconnected as transactions are mined. The best chain tip with the most-POW chain changes over time, thus, the chain data sourcer must synchronize all listeners to the best chain tip as it changes.
+This synchronization is important because at any time $$T_1$$, the state of the blockchain will change from when it was last viewed. Blocks are added and removed as transactions are mined. The best chain tip with the most-POW chain is constantly changing, thus, the chain data sourcer must synchronize all listeners.
 
 <figure><img src="obsidian.images/chain.sourcing/listeners.view.of.blockchain.2.png" alt=""><figcaption><p><strong>Figure 3</strong>: Listeners' view of the blockchain's best tip changes as blocks are connected and disconnected during chain re-organization over time.</p></figcaption></figure>
 
-**Figure 3** depicts the changing blockchain as viewed at different timestamps $$T_i$$ by the sourcer, who in turn, notifies the listeners of this view. At $$T_1$$, the best tip $$block_{n + 6}$$ is on $$chain_3$$. At some other time $$T_2$$, the best tip is at $$block_{n + 6}$$ on $$chain_2$$.
+To further clarify, **Figure 3** depicts the changing blockchain as viewed at different timestamps $$T_i$$ by the sourcer. At $$T_1$$, the best tip $$block_{n + 6}$$ is on $$chain_3$$. At some other time $$T_2$$, the best tip is at $$block_{n + 6}$$ on $$chain_2$$.
 
 <figure><img src="obsidian.images/chain.sourcing/spv.client.jpg" alt=""><figcaption><p><strong>Figure 4</strong>: LDK's Simple Payment Verification (SPV) Client.</p></figcaption></figure>
 
-To achieve this synchronization, LDK provides a lightweight Simple Payment Verification (SPV) client - [SpvClient](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L182) (**Figure 4** above) that polls a trusted block source for block and header data with its [ChainPoller](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/poll.rs#L200), via a [BlockSource](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L59) client. Afterwards, it updates the provided [Listen](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning/src/chain/mod.rs#L80)ers with its [ChainNotifier](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L300). This update is a little nuanced because:
-
-1. The blockchain is a continuously updating ledger.
-2. The listeners' view of the chain will change in-between poll requests as 1 happens.
-3. Listeners need to be informed of newly (dis)connected blocks, and if there is chain re-organization, the observed chain difference.
+To achieve this synchronization, LDK provides a lightweight Simple Payment Verification (SPV) client - [SpvClient](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L182) (**Figure 4** above) that polls a trusted block source for block and header data with its [ChainPoller](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/poll.rs#L200), via a [BlockSource](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L59) client. Afterwards, it updates the provided [Listen](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning/src/chain/mod.rs#L80)ers with its [ChainNotifier](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L300). This update is a little nuanced consideration because of chain reorganization.
 
 <figure><img src="obsidian.images/chain.sourcing/computing.chain.difference.jpg" alt=""><figcaption><p><strong>Figure 5</strong>: Computing the chain difference when there is a re-organization with blocks connected and disconnected.</p></figcaption></figure>
 

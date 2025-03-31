@@ -32,7 +32,11 @@ As previously stated, the high-level logic for chain data sourcing is two-fold. 
 
 ## Block-oriented Chain Data Sourcing
 
-LN nodes that plan to operate without major resource constraints may consider fetching block data from a full bitcoin node. The collection of channel monitors, on-/off-chain wallets, and liquidity managers can `listen` for block (dis)connection events of note on the blockchain. When these events occur, the chain data source can poll the blockchain for updates, and then update/notify the listeners interested in the block events. A typical use case for such a sourcer is the continuous synchronization of listeners to the most-Proof-of-Work (POW) chain tip. This typically involves:
+Block-oriented chain data sourcing involves directly interacting with a full bitcoin node to obtain complete chain data. This method is suitable for nodes with ample computational power and storage, as it requires processing and storing large volumes of data. The method provides the highest level of trust, because the LN node validates all data itself.&#x20;
+
+The nodes provide a collection of channel monitors (one per channel), on-/off-chain wallets, and liquidity managers that can `listen` for block (dis)connection events of note. These listeners require constant updates to maintain accurate information about the blockchain. So, when blocks are mined, the chain data sourcer polls the blockchain for updates, and then updates/notifies the listeners interested in the block events.&#x20;
+
+A typical use case for such a sourcer is the continuous synchronization of listeners to the most-Proof-of-Work (POW) chain tip. This typically involves:
 
 1. Syncing wallets so they are aware of relevant transactions.
 2. Updating the fee rate estimates so that transactions/claims can be broadcast and bumped with the right fees.

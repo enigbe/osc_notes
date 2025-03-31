@@ -78,9 +78,11 @@ Block sources for these kinds of operations are typically indexed blockchain ser
 
 ### Implementation Aside: Transaction Syncing with LDK
 
-LDK in its `lightning-transaction-sync` crate, provides esplora and electrum sync clients that implement a `Filter` interface with which "clients" indicate interest in; the registered transactions and outputs added to a filter queue. The sync client, processes these registrations and based on the blockchain state, e.g the addition of a new chain tip, notifies the clients of unconfirmed or confirmed transactions, bringing itself, and the confirmation clients into sync with the current best tip.
+LDK, in its `lightning-transaction-sync` crate, provides [`EsploraSyncClient`](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-transaction-sync/src/esplora.rs#L45) and [`ElectrumSyncClient`](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-transaction-sync/src/electrum.rs#L50) that both implement a [`Filter`](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning/src/chain/mod.rs#L330) interface. This interface allows "clients" to indicate interest in the registered transactions and outputs, which are then added to a [`FilterQueue`](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-transaction-sync/src/common.rs#L103). The sync clients, process these registrations and based on change in the blockchain state, i.e. the mining of a new block, determines whether: a watched transaction remains unconfirmed/confirmed, a watched output is remains unspent, or is already spent but awaiting a threshold number of confirmations. It then notifies the clients of these observations, bringing itself, and the confirmation clients into sync with the blockchain.
 
 <figure><img src="obsidian.images/chain.sourcing/transaction.oriented.syncing.jpg" alt=""><figcaption><p><strong>Figure 8</strong>: LDK's EsploraSyncClient.</p></figcaption></figure>
+
+
 
 The chain sourcing responsibilities remain as previously stated.
 

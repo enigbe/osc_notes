@@ -16,9 +16,11 @@ Firstly, for every distinct channel a LN node (plans to) operate with a peer/cou
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/chain.sourcing.channel.monitors.jpg" width=600px>
-<p>Figure 1: Depiction of LN channels as conduit of high-speed transactions anchored on the base onchain layer.
-A channel monitor has to keep track of the onchain events that impact the channel's transactions of interest.</p>
+
+**Figure 1**: Depiction of LN channels as conduit of high-speed transactions anchored on the base onchain layer.A channel monitor has to keep track of the onchain events that impact the channel's transactions of interest.
 </div>
+
+
 
 Secondly, nodes must monitor the current/instantaneous onchain fee rates for their wallets (on-/off-chain) to calculate the right transaction fees for funding channels or for claims. Additionally, nodes that offer liquidity services, i.e., Liquidity Service Providers (LSPs), require onchain monitoring for special channels, such as Just-In-Time (JIT) channels they maintain with other nodes.
 
@@ -35,8 +37,10 @@ The collection of channel monitors, on-/off-chain wallets, and liquidity manager
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/block.oriented.chain.sourcer.2.jpg" width=600px>
-<p>Figure 2: Interaction between a block-oriented chain data sourcer, a block source, and block event listeners.</p>
+
+**Figure 2**: Interaction between a block-oriented chain data sourcer, a block source, and block event listeners.
 </div>
+
 
 ### Implementation Aside: Block-syncing with LDK
 LDK, in its `lightning-block-sync` crate, provides a helpful client to keep listeners "in-sync" with the blockchain. In-sync here meaning that the listeners all have the same view of the blockchain. 
@@ -46,12 +50,14 @@ Having the same view is important because at any time T<sub><i>i</i></sub>, the 
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/listeners.view.of.blockchain.jpg" width=600px>
-<p>Figure 3: Listeners' view of the blockchain's best tip changes as blocks are connected and disconnected during chain re-organization over time.</p>
+
+**Figure 3**: Listeners' view of the blockchain's best tip changes as blocks are connected and disconnected during chain re-organization over time.
 </div>
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/spv.client.jpg" width=600px>
-<p>Figure 4: LDK's Simple Payment Verification (SPV) Client.</p>
+
+**Figure 4**: LDK's Simple Payment Verification (SPV) Client
 </div>
 
 To achieve this synchronization, LDK provides a lightweight Simple Payment Verification (SPV) client - [SpvClient](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L182) (see image above) that polls a trusted block source for block and header data with its [ChainPoller](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/poll.rs#L200), via a [BlockSource](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L59) client, and updates the provided [Listen](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning/src/chain/mod.rs#L80)ers with its [ChainNotifier](https://github.com/lightningdevkit/rust-lightning/blob/8b3f6cca2f3f33cd6f5bb68ef2db7caa593278c7/lightning-block-sync/src/lib.rs#L300). This update is a little nuanced because:
@@ -61,7 +67,8 @@ To achieve this synchronization, LDK provides a lightweight Simple Payment Verif
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/computing.chain.difference.jpg" width=600px>
-<p>Figure 5: Computing the chain difference when there is a re-organization with blocks connected and disconnected.</p>
+
+**Figure 5**: Computing the chain difference when there is a re-organization with blocks connected and disconnected.
 </div>
 
 To capture the difference, the notifier identifies a shared/common (Figure 5C) ancestor between the chain it previously notified the listeners of (Chain<sub>2</sub> in Figure 5A), and the new chain (Chain<sub>1</sub> in Figure 5B). Having identified such an ancestor, it walks back the the blocks in Chain<sub>2</sub>, disconnecting all until it reaches the ancestor, and then walks up the blocks in Chain<sub>1</sub>, connecting all until it gets to the most-POW chain tip. These listeners are then notified of the (dis)connected blocks.
@@ -72,7 +79,8 @@ LDK users like [LDK Node](https://github.com/lightningdevkit/ldk-node) that are 
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/ldk.node.chain.sourcer.bitcoinrpc.jpg" width=600px>
-<p>Figure 6: Component layout of LDK-Node's ChainSource that synchronizes with block-orientation. Although the SpvClient is not depicted, it is utilized internally.</p>
+
+**Figure 6**: Component layout of LDK-Node's ChainSource that synchronizes with block-orientation. Although the SpvClient is not depicted, it is utilized internally.
 </div>
 
 ## Transaction-oriented Chain Data Sourcing
@@ -82,7 +90,8 @@ Block sources for these kinds of operations are typically indexed blockchain ser
 
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/transaction.oriented.chain.sourcer.jpg" width=600px>
-<p>Figure 7: Interaction between a transaction-oriented chain data sourcer, an indexed block source, and objects awaiting transaction event confirmation.</p>
+
+**Figure 7**: Interaction between a transaction-oriented chain data sourcer, an indexed block source, and objects awaiting transaction event confirmation.
 </div>
 
 ### Implementation Aside: Transaction Syncing with LDK
@@ -90,7 +99,8 @@ Block sources for these kinds of operations are typically indexed blockchain ser
 LDK in its `lightning-sync-sync` crate, provides esplora/electrum sync clients that implement a `filter` interface with which "clients" indicate interest in; the registered transactions and outputs added to a filter queue. The sync client, processes these registrations and based on the blockchain state, e.g the addition of a new chain tip, notifies the clients of unconfirmed or confirmed transactions, bringing itself, and the confirmation clients into sync with the current best tip.
 <div style="text-align: center;">
 <img src="./obsidian.images/chain.sourcing/transaction.oriented.syncing.jpg" width=600px>
-<p>Figure 8: LDK's EsploraSyncClient.</p>
+
+**Figure 8**: LDK's EsploraSyncClient.
 </div>
 
 The chain sourcing responsibilites remain as previously stated.

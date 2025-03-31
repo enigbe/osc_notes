@@ -8,8 +8,8 @@ description: Exploring how Lightning Nodes source onchain data.
 
 Channels on the Lightning Network (LN) are anchored on the base layer. They are turbo-charged transactions that represent high-speed transaction conduits whose lifecycle is managed by LN nodes. The LN nodes have two primary responsibilities:
 
-* The off-chain management of transaction in the conduit.
-* The tracking/monitoring of onchain transactions.
+* The off-chain management of transaction in the channel.
+* The vigilant monitoring of onchain transactions for any effects that impact channel status.
 
 To effectively do this, the LN nodes rely on a chain data sourcer that connects to block sources, like bitcoind, esplora and/or electrum servers, etc and provides notifications about onchain transaction state. This article explores the properties of such a chain data sourcer in two distinct operational modes/orientation:
 
@@ -65,7 +65,7 @@ To handle blockchain reorganizations, the notifier must identify what changed be
 * The previously notified chain state ($$chain_2$$ in **Figure 5A**)
 * The new chain ($$chain_1$$ in **Figure 5B**).&#x20;
 
-Having identified such an ancestor, which represents the last point of agreement between both chains, it utilizes the ancestor as a foundation for calculating exactly what blocks need (dis)connection:
+Having identified such an ancestor, which represents the last point of agreement between both chains, it utilizes the ancestor as a foundation for calculating exactly what blocks need (dis)connection. The notifier then:
 
 * Walks back the blocks in $$chain_2$$, disconnecting all blocks from tip until it reaches the ancestor.
 * Walks up the blocks in $$chain_1$$, connecting all until from the ancestor until it gets to the most-POW chain tip.&#x20;

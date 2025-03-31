@@ -60,7 +60,17 @@ To achieve this synchronization, LDK provides a lightweight Simple Payment Verif
 
 <figure><img src="obsidian.images/chain.sourcing/computing.chain.difference.jpg" alt=""><figcaption><p><strong>Figure 5</strong>: Computing the chain difference when there is a re-organization with blocks connected and disconnected.</p></figcaption></figure>
 
-To capture the difference, the notifier identifies a shared/common ancestor (**Figure 5C**) between the chain it previously notified the listeners of ($$chain_2$$ in **Figure 5A**), and the new chain ($$chain_1$$ in **Figure 5B**). Having identified such an ancestor, it walks back the blocks in $$chain_2$$, disconnecting all until it reaches the ancestor, and then walks up the blocks in $$chain_1$$, connecting all until it gets to the most-POW chain tip. The listeners are then notified of the (dis)connected blocks.
+To handle blockchain reorganizations, the notifier must identify what changed between updates. The notifier identifies a shared/common ancestor block (**Figure 5C**) that exists in both:
+
+* The previously notified chain state ($$chain_2$$ in **Figure 5A**)
+* The new chain ($$chain_1$$ in **Figure 5B**).&#x20;
+
+Having identified such an ancestor, which represents the last point of agreement between both chains, it utilizes the ancestor as a foundation for calculating exactly what blocks need (dis)connection:
+
+* Walks back the blocks in $$chain_2$$, disconnecting all blocks from tip until it reaches the ancestor.
+* Walks up the blocks in $$chain_1$$, connecting all until from the ancestor until it gets to the most-POW chain tip.&#x20;
+
+The listeners are then notified of the (dis)connected blocks.
 
 ### Implementation Aside: Chain Sourcing with LDK-Node
 

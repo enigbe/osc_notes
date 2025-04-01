@@ -6,7 +6,7 @@ description: Exploring how Lightning Nodes source onchain data.
 
 ## Audience
 
-This article is written for software developers with working knowledge of&#x20;
+This article is written for software developers with working knowledge of Bitcoin blockchain and transactions, with some familiarity with the Lightning Network (LN) and channel operations.&#x20;
 
 ## Introduction
 

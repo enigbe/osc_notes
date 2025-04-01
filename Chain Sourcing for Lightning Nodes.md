@@ -4,6 +4,10 @@ description: Exploring how Lightning Nodes source onchain data.
 
 # Chain Sourcing Lightning Nodes
 
+## Audience
+
+This article is written for software developers with working knowledge of&#x20;
+
 ## Introduction
 
 Channels on the Lightning Network (LN) are anchored on the base layer. They are turbo-charged transactions that represent high-speed transaction conduits whose lifecycle is managed by LN nodes. The LN nodes have two primary responsibilities:

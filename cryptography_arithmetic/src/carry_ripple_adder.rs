@@ -1,12 +1,10 @@
 use crate::common::{Bit, BitVec, full_adder};
 
-fn serial_adder(op1: BitVec, op2: BitVec) -> BitVec {
-    let max_digits = op1.len().max(op2.len());
-
-    let mut sum: BitVec = Vec::with_capacity(max_digits + 1); // +1 to account for possible final carry
+fn carry_ripple_adder(op1: BitVec, op2: BitVec, word_size: usize) -> BitVec {
+    let mut sum: BitVec = Vec::with_capacity(word_size + 1);
     let mut carry = Bit::Zero;
 
-    for i in 0..max_digits {
+    for i in 0..word_size {
         let x_i = if i < op1.len() { op1[i] } else { Bit::Zero };
         let y_i = if i < op2.len() { op2[i] } else { Bit::Zero };
 

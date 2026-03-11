@@ -1,0 +1,2 @@
+[workspace]
+members = ["cryptography_arithmetic", "hacking_cryptography"]
